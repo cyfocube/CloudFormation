@@ -1,0 +1,205 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+      "CIDRBlock": {
+        "Type": "String",
+        "Description": "CIDR block for the VPC"
+      },
+      "SubnetBlock01": {
+        "Type": "String",
+        "Description": "CIDR block for Public Subnet 01"
+      },
+      "SubnetBlock02": {
+        "Type": "String",
+        "Description": "CIDR block for Public Subnet 02"
+      },
+      "SubnetBlock03": {
+        "Type": "String",
+        "Description": "CIDR block for Private Subnet 03"
+      },
+      "SubnetBlock04": {
+        "Type": "String",
+        "Description": "CIDR block for Private Subnet 04"
+      },
+      "SubnetBlock05": {
+        "Type": "String",
+        "Description": "CIDR block for Data Subnet 05"
+      },
+      "SubnetBlock06": {
+        "Type": "String",
+        "Description": "CIDR block for Data Subnet 06"
+      },
+      "VPCName": {
+        "Type": "String",
+        "Description": "Name of the VPC"
+      },
+      "AllNetwork": {
+        "Type": "String",
+        "Description": "CIDR block for all networks"
+      }
+    },
+    "Resources": {
+      "TMVPC": {
+        "Type": "AWS::EC2::VPC",
+        "Properties": {
+          "CidrBlock": { "Ref": "CIDRBlock" },
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-vpc" } }
+          ]
+        }
+      },
+      "TMSubnet01": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "CidrBlock": { "Ref": "SubnetBlock01" },
+          "AvailabilityZone": { "Fn::Select": [0, { "Fn::GetAZs": "" }] },
+          "MapPublicIpOnLaunch": true,
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-subnet01" } }
+          ]
+        }
+      },
+      "TMSubnet02": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "CidrBlock": { "Ref": "SubnetBlock02" },
+          "AvailabilityZone": { "Fn::Select": [1, { "Fn::GetAZs": "" }] },
+          "MapPublicIpOnLaunch": true,
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-subnet02" } }
+          ]
+        }
+      },
+      "TMInternetGateway": {
+        "Type": "AWS::EC2::InternetGateway",
+        "Properties": {
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-igw" } }
+          ]
+        },
+        "DependsOn": "TMVPC"
+      },
+      "TMGatewayAttachment": {
+        "Type": "AWS::EC2::VPCGatewayAttachment",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "InternetGatewayId": { "Ref": "TMInternetGateway" }
+        }
+      },
+      "TMRouteTablePublic": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-pub_rt" } }
+          ]
+        },
+        "DependsOn": "TMVPC"
+      },
+      "TMRoutePublic": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+          "RouteTableId": { "Ref": "TMRouteTablePublic" },
+          "DestinationCidrBlock": { "Ref": "AllNetwork" },
+          "GatewayId": { "Ref": "TMInternetGateway" }
+        },
+        "DependsOn": "TMInternetGateway"
+      },
+      "TMSubnetRouteTableAssociation01": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": { "Ref": "TMSubnet01" },
+          "RouteTableId": { "Ref": "TMRouteTablePublic" }
+        }
+      },
+      "TMSubnetRouteTableAssociation02": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": { "Ref": "TMSubnet02" },
+          "RouteTableId": { "Ref": "TMRouteTablePublic" }
+        }
+      },
+      "TMNatGateway": {
+        "Type": "AWS::EC2::NatGateway",
+        "Properties": {
+          "AllocationId": { "Fn::GetAtt": ["TMEIP", "AllocationId"] },
+          "SubnetId": { "Ref": "TMSubnet01" }
+        },
+        "DependsOn": "TMInternetGateway"
+      },
+      "TMEIP": {
+        "Type": "AWS::EC2::EIP",
+        "Properties": {
+          "Domain": "vpc",
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-pr_nat" } }
+          ]
+        }
+      },
+      "TMRouteTablePrivate": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" }
+        }
+      },
+      "TMPrivateRoute": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+          "RouteTableId": { "Ref": "TMRouteTablePrivate" },
+          "DestinationCidrBlock": { "Ref": "AllNetwork" },
+          "NatGatewayId": { "Ref": "TMNatGateway" }
+        }
+      },
+      "TMSubnet03": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "CidrBlock": { "Ref": "SubnetBlock03" },
+          "AvailabilityZone": { "Fn::Select": [0, { "Fn::GetAZs": "" }] },
+          "MapPublicIpOnLaunch": false,
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-subnet03" } }
+          ]
+        }
+      },
+      "TMSubnet04": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "CidrBlock": { "Ref": "SubnetBlock04" },
+          "AvailabilityZone": { "Fn::Select": [1, { "Fn::GetAZs": "" }] },
+          "MapPublicIpOnLaunch": false,
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-subnet04" } }
+          ]
+        }
+      },
+      "TMSubnet05": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "CidrBlock": { "Ref": "SubnetBlock05" },
+          "AvailabilityZone": { "Fn::Select": [0, { "Fn::GetAZs": "" }] },
+          "MapPublicIpOnLaunch": false,
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-subnet05_data" } }
+          ]
+        }
+      },
+      "TMSubnet06": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": { "Ref": "TMVPC" },
+          "CidrBlock": { "Ref": "SubnetBlock06" },
+          "AvailabilityZone": { "Fn::Select": [1, { "Fn::GetAZs": "" }] },
+          "MapPublicIpOnLaunch": false,
+          "Tags": [
+            { "Key": "Name", "Value": { "Fn::Sub": "${VPCName}-subnet06_data" } }
+          ]
+        }
+      }
+    }
+  }
+  

@@ -1,0 +1,12 @@
+{
+  "Outputs": {
+    "sec_gro_id": {
+      "Value": {
+        "Fn::GetAtt": [
+          "TMsecgroupforlb",
+          "GroupId"
+        ]
+      }
+    }
+  }
+}

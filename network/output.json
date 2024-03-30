@@ -1,0 +1,46 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+      "TM_vpcid": {
+        "Value": { "Ref": "TMVPC" },
+        "Description": "ID of the created VPC"
+      },
+      "TM_sub01_id": {
+        "Value": { "Ref": "TMSubnet01" },
+        "Description": "ID of the created Subnet 01"
+      },
+      "TM_sub02_id": {
+        "Value": { "Ref": "TMSubnet02" },
+        "Description": "ID of the created Subnet 02"
+      },
+      "TM_sub03_id": {
+        "Value": { "Ref": "TMSubnet03" },
+        "Description": "ID of the created Subnet 03"
+      },
+      "TM_sub04_id": {
+        "Value": { "Ref": "TMSubnet04" },
+        "Description": "ID of the created Subnet 04"
+      },
+      "TM_sub05_id": {
+        "Value": { "Ref": "TMSubnet05" },
+        "Description": "ID of the created Subnet 05"
+      },
+      "TM_sub06_id": {
+        "Value": { "Ref": "TMSubnet06" },
+        "Description": "ID of the created Subnet 06"
+      },
+      "gtwy_id": {
+        "Value": { "Ref": "TMInternetGateway" },
+        "Description": "ID of the created Internet Gateway"
+      },
+      "VarName": {
+        "Value": { "Ref": "VPCName" },
+        "Description": "Name of the VPC"
+      },
+      "available_availability_zones": {
+        "Description": "List of available availability zones.",
+        "Value": { "Fn::GetAtt": ["availability_zones", "names"] }
+      }
+    }
+  }
+  

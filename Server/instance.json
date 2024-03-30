@@ -1,0 +1,136 @@
+{
+  "Resources": {
+    "TMec2LaunchTemplate": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateName": { "Fn::Join": ["", [ { "Ref": "EC2Name" }, "-template" ]] },
+        "LaunchTemplateData": {
+          "ImageId": { "Ref": "ImageName" },
+          "InstanceType": { "Ref": "InstanceType" },
+          "TagSpecifications": [
+            {
+              "ResourceType": "instance",
+              "Tags": [
+                { "Key": "Name", "Value": { "Ref": "InstanceName" } }
+              ]
+            }
+          ],
+          "NetworkInterfaces": [
+            {
+              "SubnetId": { "Ref": "TM_sub02_id" },
+              "SecurityGroups": [{ "Ref": "TM_sec_group_for_ec2" }]
+            }
+          ]
+        }
+      }
+    },
+    "TMec2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "LaunchTemplate": {
+          "LaunchTemplateId": { "Ref": "TMec2LaunchTemplate" },
+          "Version": "$Latest"
+        }
+      }
+    },
+    "TM_sec_group_for_lb": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for load balancer",
+        "VpcId": { "Ref": "TM_vpcid" },
+        "SecurityGroupIngress": [
+          {
+            "Description": "Allow all HTTP",
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0",
+            "Ipv6CidrIp": "::/0"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "Description": "Allow all outgoing traffic",
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0",
+            "Ipv6CidrIp": "::/0",
+            "FromPort": 0,
+            "ToPort": 0
+          }
+        ]
+      }
+    },
+    "TM_sec_group_for_ec2": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for EC2 instances",
+        "VpcId": { "Ref": "TM_vpcid" },
+        "SecurityGroupIngress": [
+          {
+            "Description": "Allow all HTTP from load balancer",
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0",
+            "SourceSecurityGroupId": { "Ref": "TM_sec_group_for_lb" }
+          },
+          {
+            "Description": "Allow RDP from anywhere",
+            "IpProtocol": "tcp",
+            "FromPort": 3389,
+            "ToPort": 3389,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "Description": "Allow all outgoing traffic",
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0",
+            "Ipv6CidrIp": "::/0",
+            "FromPort": 0,
+            "ToPort": 0
+          }
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "EC2Name": {
+      "Type": "String",
+      "Description": "Name prefix for EC2 instances"
+    },
+    "ImageName": {
+      "Type": "String",
+      "Description": "AMI ID for the EC2 instances"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Description": "Instance type for the EC2 instances"
+    },
+    "InstanceName": {
+      "Type": "String",
+      "Description": "Name of the EC2 instances"
+    },
+    "NumInstances": {
+      "Type": "Number",
+      "Description": "Number of EC2 instances to launch"
+    },
+    "TM_sub02_id": {
+      "Type": "String",
+      "Description": "ID of Subnet 02"
+    },
+    "TM_vpcid": {
+      "Type": "String",
+      "Description": "ID of the VPC"
+    },
+    "TM_sec_group_for_lb": {
+      "Type": "String",
+      "Description": "Name of the security group for the load balancer"
+    },
+    "TM_sec_group_for_ec2": {
+      "Type": "String",
+      "Description": "Name of the security group for the EC2 instances"
+    }
+  }
+}

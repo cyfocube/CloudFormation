@@ -1,0 +1,40 @@
+{
+  "Parameters": {
+    "ECName": {
+      "Type": "String",
+      "Description": "Name for the EC2 instances"
+    },
+    "ImageName": {
+      "Type": "String",
+      "Description": "AMI ID for the EC2 instances"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Description": "Instance type for the EC2 instances"
+    },
+    "InstanceName": {
+      "Type": "String",
+      "Description": "Name of the EC2 instances"
+    },
+    "NumInstances": {
+      "Type": "Number",
+      "Description": "Number of EC2 instances to launch"
+    },
+    "TMSubnet02Id": {
+      "Type": "String",
+      "Description": "ID of Subnet 02"
+    },
+    "SecurityGroupNameLB": {
+      "Type": "String",
+      "Description": "Name of the security group for the load balancer"
+    },
+    "SecurityGroupNameInstance": {
+      "Type": "String",
+      "Description": "Name of the security group for the EC2 instances"
+    },
+    "TMVpcId": {
+      "Type": "String",
+      "Description": "ID of the VPC"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Parameters": {
+    "TargetName": {
+      "Type": "String",
+      "Description": "Name of the target"
+    },
+    "TMVpcId": {
+      "Type": "String",
+      "Description": "ID of the VPC"
+    },
+    "SecurityGroupId": {
+      "Type": "String",
+      "Description": "ID of the security group"
+    },
+    "TMSubnet01Id": {
+      "Type": "String",
+      "Description": "ID of Subnet 01"
+    },
+    "TMSubnet02Id": {
+      "Type": "String",
+      "Description": "ID of Subnet 02"
+    }
+  }
+}
