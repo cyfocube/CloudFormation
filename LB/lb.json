@@ -1,0 +1,56 @@
+{
+  "Resources": {
+    "TMLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Name": "loadbalancer",
+        "Type": "application",
+        "SecurityGroups": [{ "Ref": "SecurityGroupId" }],
+        "Subnets": [{ "Ref": "TM_sub01_id" }, { "Ref": "TM_sub02_id" }]
+      }
+    }, 
+    "TMLoadBalancerTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Name": { "Ref": "TargetGroupName" },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "VpcId": { "Ref": "TM_vpcid" }
+      }
+    },
+    "TMLoadBalancerListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "LoadBalancerArn": { "Ref": "TMLoadBalancer" },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "DefaultActions": [{
+          "Type": "forward",
+          "TargetGroupArn": { "Ref": "TMLoadBalancerTargetGroup" }
+        }]
+      }
+    }
+  },
+  "Parameters": {
+    "SecurityGroupId": {
+      "Type": "String",
+      "Description": "ID of the security group for the load balancer"
+    },
+    "TM_sub01_id": {
+      "Type": "String",
+      "Description": "ID of Subnet 01"
+    },
+    "TM_sub02_id": {
+      "Type": "String",
+      "Description": "ID of Subnet 02"
+    },
+    "TargetGroupName": {
+      "Type": "String",
+      "Description": "Name of the target group"
+    },
+    "TM_vpcid": {
+      "Type": "String",
+      "Description": "ID of the VPC"
+    }
+  }
+}
